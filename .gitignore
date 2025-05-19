@@ -1,0 +1,28 @@
+# macOS system files
+.DS_Store
+
+# Build artifacts and compiled binaries
+*.o
+*.out
+*.exe
+Cracker
+Encryption
+*.txt
+
+# Debug and build folders
+outDebug/
+build/
+output/
+Cracker.dSYM/
+/bin/
+/obj/
+
+# Editor/IDE settings
+.vscode/
+*.plist
+*.log
+*.swp
+
+# Other potentially unnecessary files
+*.yml
+
