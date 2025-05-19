@@ -3,10 +3,12 @@
 
 # Build artifacts and compiled binaries
 *.o
+*a.out
+*.bin
+Key-generator
 *.out
 *.exe
-Cracker
-Encryption
+
 *.txt
 
 # Debug and build folders
