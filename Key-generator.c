@@ -1,6 +1,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+// --- Function Prototypes ---
+unsigned long long gcd(unsigned long long a, unsigned long long b);
+long long mod_inverse(long long e, long long phi);
+void string_to_ascii(const char *input, int *ascii_array, int *length);
+int u_input();
+
 unsigned long long gcd(unsigned long long a, unsigned long long b) 
 {
     while (b != 0) {
@@ -11,65 +17,63 @@ unsigned long long gcd(unsigned long long a, unsigned long long b)
     return a;
 }
 
-//Extended Euclidean Algorithm to find modular inverse
+// Extended Euclidean Algorithm to find modular inverse
 long long mod_inverse(long long e, long long phi)
 {
-        long long t = 0, newt = 1;
-        long long r = phi, newr = e;
-        while (newr != 0) {
-            long long quotient = r / newr;
-            long long temp = newt;
-            newt = t - quotient * newt;
-            t = temp;
-    
-            temp = newr;
-            newr = r - quotient * newr;
-            r = temp;
-        }
-        if (r > 1) return -1; //No inverse
-        if (t < 0) t += phi;
-        return t; 
+    long long t = 0, newt = 1;
+    long long r = phi, newr = e;
+    while (newr != 0) {
+        long long quotient = r / newr;
+        long long temp = newt;
+        newt = t - quotient * newt;
+        t = temp;
+
+        temp = newr;
+        newr = r - quotient * newr;
+        r = temp;
+    }
+    if (r > 1) return -1; // No inverse
+    if (t < 0) t += phi;
+    return t; 
 }
 
 int main()
 {
-    //assigning two prime numbers
+    // Assigning two prime numbers
     unsigned long long p = 61;
-    unsigned long long d = 53;
+    unsigned long long q = 53;
 
-    //calculating the keys
-    unsigned long long n = p * d;
+    // Calculating the RSA modulus
+    unsigned long long n = p * q;
 
-    //eulers totient function
-    unsigned long long phi = (p -1) * (d - 1);
+    // Euler's totient function
+    unsigned long long phi = (p - 1) * (q - 1);
 
-    //assigning e
+    // Assigning public exponent e
     unsigned long long e = 17;
 
-
-    //error handling
-    if(gcd(e, phi) != 1)
-    {
-        printf("e and phi are no coprime. \n");
+    // Check if e and phi are coprime
+    if (gcd(e, phi) != 1) {
+        printf("e and phi are not coprime.\n");
         return 1;
     }
 
-    unsigned long long q = mod_inverse(e, phi);
-
-    if(q == -1)
-    {
-        printf("Failed to compute modulare invers. \n");
+    // Calculate private key exponent d
+    long long d = mod_inverse(e, phi);
+    if (d == -1) {
+        printf("Failed to compute modular inverse.\n");
         return 1;
     }
 
-    //print the public and private keys
+    // Print the public and private keys
     printf("Public Key:  (n = %llu, e = %llu)\n", n, e);
     printf("Private Key: (n = %llu, d = %llu)\n", n, d);
 
+    // Prompt user for a word and convert to ASCII
+    u_input();
+
     return 0;
 }
-
-
 void string_to_ascii(const char *input, int *ascii_array, int *length)
 {
     int i;
@@ -88,13 +92,13 @@ int u_input()
     printf("Enter a word: \n");
     scanf("%s", word);
 
-   string_to_ascii(word, ascii_values, &length);
+    string_to_ascii(word, ascii_values, &length);
 
-   printf("ASCII values:\n");
-   for (i = 0; i < length; i++) {
-       printf("%d ", ascii_values[i]);
-   }
-   printf("\n");
+    printf("ASCII values:\n");
+    for (i = 0; i < length; i++) {
+        printf("%d ", ascii_values[i]);
+    }
+    printf("\n");
 
-   return 0;
+    return 0;
 }
