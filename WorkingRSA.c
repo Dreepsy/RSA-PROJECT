@@ -6,7 +6,8 @@
 unsigned long long gcd(unsigned long long a, unsigned long long b);
 long long mod_inverse(long long e, long long phi);
 void string_to_ascii(const char *input, int *ascii_array, int *length);
-void u_input(unsigned long long n, unsigned long long e);
+void encrypt_message(const char *message, unsigned long long *encrypted, int length, unsigned long long n, unsigned long long e);
+void decrypt_message(const unsigned long long *encrypted, int length, char *decrypted, unsigned long long n, unsigned long long d);
 unsigned long long mod_pow(unsigned long long base, unsigned long long exp, unsigned long long mod);
 void generate_keys(unsigned long long p, unsigned long long q, unsigned long long *n, unsigned long long *e, unsigned long long *d);
 
@@ -88,30 +89,21 @@ void generate_keys(unsigned long long p, unsigned long long q, unsigned long lon
     }
 }
 
-// ---User input and encryption---
-void u_input(unsigned long long n, unsigned long long e)
+// ---Encrypt Message---
+void encrypt_message(const char *message, unsigned long long *encrypted, int length, unsigned long long n, unsigned long long e)
 {
-    char word[100];
-    int ascii_values[100];
-    int length, i;
-
-    printf("Enter a word: \n");
-    scanf("%s", word);
-
-    string_to_ascii(word, ascii_values, &length);
-
-    printf("Original ASCII values:\n");
-    for (i = 0; i < length; i++) {
-        printf("%d ", ascii_values[i]);
+    for (int i = 0; i < length; i++) {
+        encrypted[i] = mod_pow((unsigned long long)message[i], e, n);
     }
-    printf("\n");
+}
 
-    printf("Encrypted values:\n");
-    for (i = 0; i < length; i++) {
-        unsigned long long encrypted = mod_pow(ascii_values[i], e, n);
-        printf("%llu ", encrypted);
+// ---Decrypt Message---
+void decrypt_message(const unsigned long long *encrypted, int length, char *decrypted, unsigned long long n, unsigned long long d)
+{
+    for (int i = 0; i < length; i++) {
+        decrypted[i] = (char)mod_pow(encrypted[i], d, n);
     }
-    printf("\n");
+    decrypted[length] = '\0';
 }
 
 // ---Main---
@@ -133,8 +125,29 @@ int main()
     printf("User B Public Key:  (n = %llu, e = %llu)\n", n2, e2);
     printf("User B Private Key: (n = %llu, d = %llu)\n\n", n2, d2);
 
-    // ---Perform input and encryption using User B's public key---
-    u_input(n2, e2);
+    // ---Simulate Message Sending from A to B---
+    char message[100];
+    int length;
+    int ascii_values[100];
+    unsigned long long encrypted[100];
+    char decrypted[100];
+
+    printf("User A: Enter a message to send to User B: ");
+    scanf("%s", message);
+
+    string_to_ascii(message, ascii_values, &length);
+    encrypt_message(message, encrypted, length, n2, e2);
+
+    printf("\nEncrypted message sent to User B:\n");
+    for (int i = 0; i < length; i++) {
+        printf("%llu ", encrypted[i]);
+    }
+    printf("\n\n");
+
+    // ---Simulate Message Receiving by B---
+    decrypt_message(encrypted, length, decrypted, n2, d2);
+
+    printf("User B: Decrypted message: %s\n", decrypted);
 
     return 0;
 }
