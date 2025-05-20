@@ -1,13 +1,14 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 // ---Function Prototypes---
 unsigned long long gcd(unsigned long long a, unsigned long long b);
 long long mod_inverse(long long e, long long phi);
 void string_to_ascii(const char *input, int *ascii_array, int *length);
 void u_input(unsigned long long n, unsigned long long e);
-void decrypt_message(unsigned long long n, unsigned long long d);
 unsigned long long mod_pow(unsigned long long base, unsigned long long exp, unsigned long long mod);
+void generate_keys(unsigned long long p, unsigned long long q, unsigned long long *n, unsigned long long *e, unsigned long long *d);
 
 // ---GCD Function---
 unsigned long long gcd(unsigned long long a, unsigned long long b) 
@@ -68,6 +69,25 @@ void string_to_ascii(const char *input, int *ascii_array, int *length)
     *length = i;
 }
 
+// ---RSA Key Generation---
+void generate_keys(unsigned long long p, unsigned long long q, unsigned long long *n, unsigned long long *e, unsigned long long *d)
+{
+    *n = p * q;
+    unsigned long long phi = (p - 1) * (q - 1);
+    *e = 17;
+
+    if (gcd(*e, phi) != 1) {
+        printf("e and phi are not coprime.\n");
+        exit(1);
+    }
+
+    *d = mod_inverse(*e, phi);
+    if (*d == -1) {
+        printf("Failed to compute modular inverse.\n");
+        exit(1);
+    }
+}
+
 // ---User input and encryption---
 void u_input(unsigned long long n, unsigned long long e)
 {
@@ -78,15 +98,6 @@ void u_input(unsigned long long n, unsigned long long e)
     printf("Enter a word: \n");
     scanf("%s", word);
 
-    // ---Save unencrypted word to file---
-    FILE *f_plain = fopen("unencrypted.txt", "w");
-    if (f_plain == NULL) {
-        printf("Error opening unencrypted.txt for writing.\n");
-        return;
-    }
-    fprintf(f_plain, "%s\n", word);
-    fclose(f_plain);
-
     string_to_ascii(word, ascii_values, &length);
 
     printf("Original ASCII values:\n");
@@ -95,94 +106,35 @@ void u_input(unsigned long long n, unsigned long long e)
     }
     printf("\n");
 
-    // ---Open file to store encrypted output---
-    FILE *f_enc = fopen("encrypted.txt", "w");
-    if (f_enc == NULL) {
-        printf("Error opening encrypted.txt for writing.\n");
-        return;
-    }
-
     printf("Encrypted values:\n");
     for (i = 0; i < length; i++) {
         unsigned long long encrypted = mod_pow(ascii_values[i], e, n);
-        printf("%llu ", encrypted);               // ---Print to console---
-        fprintf(f_enc, "%llu ", encrypted);       // ---Write to file---
+        printf("%llu ", encrypted);
     }
     printf("\n");
-
-    fclose(f_enc);
-}
-
-// ---Decryption function---
-void decrypt_message(unsigned long long n, unsigned long long d)
-{
-    FILE *f_enc = fopen("encrypted.txt", "r");
-    if (f_enc == NULL) {
-        printf("Error opening encrypted.txt for reading.\n");
-        return;
-    }
-
-    FILE *f_dec = fopen("decrypted.txt", "w");
-    if (f_dec == NULL) {
-        printf("Error opening decrypted.txt for writing.\n");
-        fclose(f_enc);
-        return;
-    }
-
-    printf("Decrypted word:\n");
-
-    unsigned long long encrypted;
-    while (fscanf(f_enc, "%llu", &encrypted) == 1) {
-        unsigned long long decrypted = mod_pow(encrypted, d, n);
-        char character = (char)decrypted;
-        printf("%c", character);         // ---Print to console---
-        fprintf(f_dec, "%c", character); // ---Write to file---
-    }
-
-    printf("\n");
-
-    fclose(f_enc);
-    fclose(f_dec);
 }
 
 // ---Main---
 int main()
 {
-    //Assign two prime numbers
-    unsigned long long p = 61;
-    unsigned long long q = 53;
+    // ---Generate Keys for User A---
+    unsigned long long p1 = 61, q1 = 53;
+    unsigned long long n1, e1, d1;
+    generate_keys(p1, q1, &n1, &e1, &d1);
 
-    //Calculate the RSA modulus
-    unsigned long long n = p * q;
+    printf("User A Public Key:  (n = %llu, e = %llu)\n", n1, e1);
+    printf("User A Private Key: (n = %llu, d = %llu)\n\n", n1, d1);
 
-    //Euler's totient
-    unsigned long long phi = (p - 1) * (q - 1);
+    // ---Generate Keys for User B---
+    unsigned long long p2 = 73, q2 = 67;
+    unsigned long long n2, e2, d2;
+    generate_keys(p2, q2, &n2, &e2, &d2);
 
-    //Public exponent
-    unsigned long long e = 17;
+    printf("User B Public Key:  (n = %llu, e = %llu)\n", n2, e2);
+    printf("User B Private Key: (n = %llu, d = %llu)\n\n", n2, d2);
 
-    //Check coprimality
-    if (gcd(e, phi) != 1) {
-        printf("e and phi are not coprime.\n");
-        return 1;
-    }
-
-    //Private exponent
-    long long d = mod_inverse(e, phi);
-    if (d == -1) {
-        printf("Failed to compute modular inverse.\n");
-        return 1;
-    }
-
-    //Display keys
-    printf("Public Key:  (n = %llu, e = %llu)\n", n, e);
-    printf("Private Key: (n = %llu, d = %llu)\n", n, d);
-
-    //Perform input and encryption
-    u_input(n, e);
-
-    //Perform decryption
-    decrypt_message(n, d);
+    // ---Perform input and encryption using User B's public key---
+    u_input(n2, e2);
 
     return 0;
 }
