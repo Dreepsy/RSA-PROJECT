@@ -14,7 +14,8 @@ void generate_keys(unsigned long long p, unsigned long long q, unsigned long lon
 // ---GCD Function---
 unsigned long long gcd(unsigned long long a, unsigned long long b) 
 {
-    while (b != 0) {
+    while (b != 0) 
+    {
         unsigned long long temp = b;
         b = a % b;
         a = temp;
@@ -28,7 +29,8 @@ long long mod_inverse(long long e, long long phi)
     long long t = 0, newt = 1;
     long long r = phi, newr = e;
 
-    while (newr != 0) {
+    while (newr != 0) 
+    {
         long long quotient = r / newr;
         long long temp = newt;
         newt = t - quotient * newt;
@@ -50,7 +52,8 @@ unsigned long long mod_pow(unsigned long long base, unsigned long long exp, unsi
     unsigned long long result = 1;
     base = base % mod;
 
-    while (exp > 0) {
+    while (exp > 0) 
+    {
         if (exp % 2 == 1)
             result = (result * base) % mod;
         exp = exp >> 1;
@@ -64,7 +67,8 @@ unsigned long long mod_pow(unsigned long long base, unsigned long long exp, unsi
 void string_to_ascii(const char *input, int *ascii_array, int *length)
 {
     int i;
-    for (i = 0; input[i] != '\0'; i++) {
+    for (i = 0; input[i] != '\0'; i++) 
+    {
         ascii_array[i] = (int)input[i];
     }
     *length = i;
@@ -77,13 +81,15 @@ void generate_keys(unsigned long long p, unsigned long long q, unsigned long lon
     unsigned long long phi = (p - 1) * (q - 1);
     *e = 17;
 
-    if (gcd(*e, phi) != 1) {
+    if (gcd(*e, phi) != 1) 
+    {
         printf("e and phi are not coprime.\n");
         exit(1);
     }
 
     *d = mod_inverse(*e, phi);
-    if (*d == -1) {
+    if (*d == -1) 
+    {
         printf("Failed to compute modular inverse.\n");
         exit(1);
     }
@@ -92,7 +98,8 @@ void generate_keys(unsigned long long p, unsigned long long q, unsigned long lon
 // ---Encrypt Message---
 void encrypt_message(const char *message, unsigned long long *encrypted, int length, unsigned long long n, unsigned long long e)
 {
-    for (int i = 0; i < length; i++) {
+    for (int i = 0; i < length; i++) 
+    {
         encrypted[i] = mod_pow((unsigned long long)message[i], e, n);
     }
 }
@@ -100,7 +107,8 @@ void encrypt_message(const char *message, unsigned long long *encrypted, int len
 // ---Decrypt Message---
 void decrypt_message(const unsigned long long *encrypted, int length, char *decrypted, unsigned long long n, unsigned long long d)
 {
-    for (int i = 0; i < length; i++) {
+    for (int i = 0; i < length; i++) 
+    {
         decrypted[i] = (char)mod_pow(encrypted[i], d, n);
     }
     decrypted[length] = '\0';
@@ -139,7 +147,8 @@ int main()
     encrypt_message(message, encrypted, length, n2, e2);
 
     printf("\nEncrypted message sent to User B:\n");
-    for (int i = 0; i < length; i++) {
+    for (int i = 0; i < length; i++) 
+    {
         printf("%llu ", encrypted[i]);
     }
     printf("\n\n");
